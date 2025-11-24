@@ -75,6 +75,77 @@ labo-bi-olist/
 └── README.md
 ```
 
+## Dossier 01_comprehension_donnees/
+
+Contient tout ce qui concerne la compréhension du problème et des données :
+
+- Résumé du document de labo et du contexte Olist
+- Analyse des tables de staging
+- Schémas/diagrammes du modèle relationnel (staging)
+
+## Dossier 02_modele_dimensionnel/
+
+Contient la conception du modèle dimensionnel :
+
+- Schéma en étoile (fichier .drawio + export .png)
+- Description des dimensions (attributs, clés, grain)
+- Description des tables de faits (grain, mesures, FK)
+
+## Dossier 03_etl/
+
+Contient tout ce qui concerne l’alimentation du DW :
+
+- Mapping source → cible (staging → dimensions/faits)
+- Scripts SQL utiles
+- Captures d’écran des flux SSIS (ou autre ETL)
+- Notes techniques sur les choix ETL
+
+## Dossier 04_datawarehouse/
+
+Contient :
+
+- Scripts SQL de création des tables du DW
+- Scripts de chargement (dimensions, faits)
+- Diagramme final du modèle logique/physique
+
+## Dossier 05_reporting/
+
+Contient :
+
+- Fichiers de rapport (ex. Power BI : .pbix)
+- Captures d’écran principales des dashboards
+- Notes d’analyse (quels indicateurs, quelles conclusions)
+
+---
+
+Technologies et outils
+
+- SGBD : SQL Server
+- ETL : SSIS (ou autre outil ETL choisi)
+- Reporting : Power BI (ou Qlik / Tableau selon consignes)
+- Modélisation : diagrams.net / draw.io pour les schémas
+
+---
+
+Comment naviguer dans ce dépôt
+
+1. Commencer par journal_de_bord.md pour voir la chronologie du travail.
+2. Lire les fichiers de 01_comprehension_donnees/ pour comprendre la base de données source.
+3. Consulter 02_modele_dimensionnel/ pour le schéma en étoile et les descriptions.
+4. Voir 03_etl/ et 04_datawarehouse/ pour l’implémentation technique.
+5. Terminer par 05_reporting/ pour les dashboards et l’interprétation des résultats.
+
+---
+
+## Statut du projet
+
+- [x] Compréhension des données terminée
+- [ ] Modèle dimensionnel validé
+- [ ] ETL implémenté
+- [ ] Datawarehouse alimenté
+- [ ] Rapports BI créés
+- [ ] Documentation finalisée
+
 ---
 
 ## Author
