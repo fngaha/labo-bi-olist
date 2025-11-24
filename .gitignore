@@ -1,0 +1,23 @@
+# Fichiers systèmes
+.DS_Store
+Thumbs.db
+
+# Sauvegardes et fichiers temporaires
+*.tmp
+*.bak
+*.backup
+
+# Dossiers ETL (si SSIS)
+bin/
+obj/
+
+# Power BI fichiers lourds (optionnel)
+# *.pbix
+# *.pbit
+
+# Fichiers logs
+*.log
+
+# Environnements virtuels Python
+venv/
+.env/
