@@ -249,7 +249,39 @@ Le grain le plus logique :
 
 ---
 
-# 5. Conclusion
+## 5. Schéma du modèle relationnel (staging)
+
+Le schéma complet du staging fourni dans le document Olist est disponible dans :
+01_comprehension_donnees/diagrammes/staging_schema.png
+
+Ce schéma illustre visuellement les relations décrites dans ce fichier :
+
+- orders est bien la table centrale du modèle relationnel.
+- order_items dépend de orders via order_id, et relie produits et vendeurs.
+- order_payments et order_reviews sont rattachés directement à orders.
+- products est reliée à la table de traduction des catégories.
+- customers et sellers sont liés par leur zip_code_prefix aux données de géolocalisation.
+
+Cette visualisation permet de valider :
+
+1. Les cardinalités :
+
+- 1 commande → N items
+- 1 commande → N paiements
+- 1 commande → 1 review (optionnelle)
+- N clients → N zones géographiques
+
+2. Les clés importantes pour la modélisation dimensionnelle
+
+3. La justification du grain de la future table de faits
+
+4. La liste des dimensions candidates (produit, client, vendeur, catégorie, dates, etc.)
+
+Le diagramme sert de base à la construction du schéma en étoile dans la prochaine étape.
+
+---
+
+# 6. Conclusion
 
 Le staging Olist fournit une base riche et cohérente pour construire un modèle dimensionnel centré sur les ventes.
 
