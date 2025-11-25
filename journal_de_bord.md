@@ -56,16 +56,70 @@ Comprendre en profondeur les données Olist et analyser le staging fourni (premi
 
 ---
 
-### Prochaines étapes
+## Séance 2 – [2025-11-25]
 
-- Préparer les fichiers suivants :
-  - `description_dimensions.md`
-  - `description_faits.md`
-- Concevoir le **schéma en étoile** dans `schema_etoile.drawio`.
-- Valider définitivement :
-  - le grain de la table de faits,
-  - la liste des dimensions,
-  - les mesures principales.
+### Objectif principal
+Concevoir entièrement le modèle dimensionnel du projet Olist : dimensions, table de faits et schéma en étoile.
+
+---
+
+### Tâches réalisées
+
+- Création du fichier `description_dimensions.md` décrivant en détail toutes les dimensions du modèle :
+  - D_Date  
+  - D_Product  
+  - D_Category  
+  - D_Customer  
+  - D_Seller  
+  - D_PaymentType  
+  - D_OrderStatus  
+
+- Création du fichier `description_faits.md` :
+  - Validation du grain : **1 ligne = 1 article d’une commande (order_id, order_item_id)**  
+  - Définition des mesures : Quantity, Item_Price, Freight_Value, Item_Total  
+  - Définition des FK vers dimensions  
+  - Ajout des attributs dégénérés  
+
+- Conception du schéma en étoile :
+  - Création du fichier `schema_etoile.drawio`
+  - Export en PNG `schema_etoile.png`
+  - Ajout de toutes les dimensions et connecteurs PK/FK
+  - Vérification de la disposition et du rendu professionnel
+
+---
+
+### Décisions importantes
+
+- Le grain de la table de faits est fixé à **l’article de commande** (niveau le plus fin).
+- Les dimensions définitives sont validées :
+  - Date (plusieurs rôles : achat, livraison réelle, livraison estimée)
+  - Produit
+  - Catégorie
+  - Client
+  - Vendeur
+  - Type de paiement
+  - Statut de commande
+- Les mesures principales validées :
+  - Quantity = 1  
+  - Item_Price  
+  - Freight_Value  
+  - Item_Total  
+
+---
+
+### Difficultés rencontrées
+- Trouver la meilleure manière de représenter plusieurs dates dans un schéma en étoile.
+- Organiser proprement les attributs dans diagrams.net.
+- Décider si D_Geolocation devait être intégrée ou séparée.
+
+---
+
+### Prochaines étapes
+- Préparer le **mapping ETL** (source → dimensions → faits)
+- Créer les scripts SQL pour :
+  - les dimensions
+  - la table de faits
+- Commencer la mise en place du Data Warehouse (tables physiques)
 
 ---
 
