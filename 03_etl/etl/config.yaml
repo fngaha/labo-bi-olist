@@ -1,0 +1,8 @@
+sqlserver:
+  host: "GOS-VDI410\\TFTIC"       
+  driver: "ODBC Driver 17 for SQL Server"
+  user: ""
+  password: ""
+
+  database_staging: "Olist_Staging"
+  database_dw: "Olist_DW"

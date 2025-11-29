@@ -114,12 +114,81 @@ Concevoir entièrement le modèle dimensionnel du projet Olist : dimensions, tab
 
 ---
 
+## Séance 3 – [2025-11-29]
+
+### Objectif principal
+Mettre en place un premier flux ETL 100 % Python (SQLAlchemy + pandas) entre le staging Olist et le datawarehouse, en commençant par la dimension D_Category.
+
+---
+
+### Tâches réalisées
+
+- Définition du mapping ETL entre le staging Olist et le datawarehouse
+
+- Création de la base de datawarehouse :
+  - Création de la base `Olist_DW` dans SQL Server.
+
+- Création des tables de dimension dans `Olist_DW` :
+  - `D_Date` (via le script `Create_Populate_DateDimension.sql`)
+  - `D_Category`
+  - `D_Product`
+  - `D_Customer`
+  - `D_Seller`
+  - `D_PaymentType`
+  - `D_OrderStatus`
+
+- Mise en place de l’architecture ETL Python dans `03_etl/etl/` :
+  - `config.yaml` : paramètres de connexion à SQL Server (staging + DW)
+  - `db_connection.py` : connexion via SQLAlchemy + pyodbc, authentification Windows (`Trusted_Connection`)
+  - `extract_staging.py` : lecture des tables de staging (`products`, `customers`, `sellers`, `orders`, `order_payments`, `product_category_name_translation`, …)
+  - `extract_dw.py` : lecture de certaines dimensions déjà chargées (ex : `D_Category` pour récupérer `Category_SK`)
+  - `transform_dimensions.py` : logique de transformation pour :
+    - `D_Category` (distinct des catégories à partir de `product_category_name_translation`)
+    - `D_Product` (join avec `D_Category` pour récupérer `Category_SK`)
+    - `D_Customer` (1 ligne par `customer_unique_id`)
+    - `D_Seller` (1 ligne par `seller_id`)
+    - `D_PaymentType` (liste distincte des `payment_type`)
+    - `D_OrderStatus` (liste distincte des `order_status`)
+  - `load_dimensions.py` : chargement des DataFrames dans les tables DW (`TRUNCATE` + `to_sql`)
+  - `main.py` : fonctions `run_etl_d_category`, `run_etl_d_product`, `run_etl_d_customer`, `run_etl_d_seller`, `run_etl_d_payment_type`, `run_etl_d_order_status`
+  - `test_connexion.py` : script de test de la connexion à `Olist_Staging` via SQLAlchemy.
+
+- Mise en place d’un petit script de test de connexion :
+  - `test_connexion.py` pour valider l’accès à `Olist_Staging` via SQLAlchemy.
+
+- Exécution et validation des ETL dimensionnels :
+  - Lancement des ETL Python dimension par dimension.
+  - Vérification dans SQL Server que les tables suivantes sont correctement alimentées :
+    - `Olist_DW.dbo.D_Category`
+    - `Olist_DW.dbo.D_Product`
+    - `Olist_DW.dbo.D_Customer`
+    - `Olist_DW.dbo.D_Seller`
+    - `Olist_DW.dbo.D_PaymentType`
+    - `Olist_DW.dbo.D_OrderStatus`
+
+---
+
+### Points techniques importants
+
+- Utilisation de **SQLAlchemy** avec le driver ODBC `ODBC Driver 17 for SQL Server` et authentification Windows sur l’instance nommée `GOS-VDI410\TFTIC` (`Trusted_Connection=yes`).
+- Découpage clair de l’ETL :
+  - EXTRACT (staging, DW)
+  - TRANSFORM (construction des dimensions)
+  - LOAD (insertion dans le DW)
+- Respect du grain choisi :
+  - `D_Product` : 1 ligne par `product_id`
+  - `D_Customer` : 1 ligne par `customer_unique_id`
+  - `D_Seller` : 1 ligne par `seller_id`
+  - `D_PaymentType` : 1 ligne par `payment_type`
+  - `D_OrderStatus` : 1 ligne par `order_status`
+
+---
+
 ### Prochaines étapes
-- Préparer le **mapping ETL** (source → dimensions → faits)
-- Créer les scripts SQL pour :
-  - les dimensions
-  - la table de faits
-- Commencer la mise en place du Data Warehouse (tables physiques)
+
+- Créer le script SQL de la table de faits `F_Ventes_Items` dans `Olist_DW`.
+- Implémenter l’ETL Python pour la table de faits à partir des tables de staging (`order_items`, `orders`, `order_payments`, `products`, `customers`, `sellers`).
+- Vérifier l’intégrité référentielle (lookups vers toutes les dimensions) et les mesures calculées.
 
 ---
 

@@ -1,0 +1,14 @@
+IF DB_ID('Olist_DW') IS NOT NULL
+BEGIN
+    ALTER DATABASE Olist_DW SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE Olist_DW;
+END
+GO
+
+CREATE DATABASE Olist_DW;
+GO
+
+USE Olist_DW;
+GO
+
+PRINT 'Base de données Olist_DW créée avec succès.';
