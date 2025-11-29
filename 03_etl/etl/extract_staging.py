@@ -71,6 +71,16 @@ def extract_orders() -> pd.DataFrame:
     return df
 
 
+def extract_order_items() -> pd.DataFrame:
+    """
+    Lit la table order_items dans le staging.
+    """
+    engine = get_engine("database_staging")
+    query = "SELECT * FROM dbo.order_item;"
+    df = pd.read_sql(query, engine)
+    return df
+
+
 def extract_all_staging() -> dict:
     """
     Charge toutes les tables de staging nécessaires dans des DataFrames.

@@ -140,9 +140,9 @@ Comment naviguer dans ce dépôt
 ## Statut du projet
 
 - [x] Compréhension des données terminée
-- [ ] Modèle dimensionnel validé
-- [ ] ETL implémenté
-- [ ] Datawarehouse alimenté
+- [x] Modèle dimensionnel validé
+- [x] ETL implémenté
+- [x] Datawarehouse alimenté
 - [ ] Rapports BI créés
 - [ ] Documentation finalisée
 

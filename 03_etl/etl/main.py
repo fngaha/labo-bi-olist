@@ -5,6 +5,7 @@ from .extract_staging import (
     extract_sellers,
     extract_order_payments,
     extract_orders,
+    extract_order_items,
 )
 from .transform_dimensions import (
     build_d_category,
@@ -22,9 +23,17 @@ from .load_dimensions import (
     load_d_payment_type,
     load_d_order_status,
 )
-from .extract_dw import read_d_category
-# plus tard: from .transform_facts import build_fact_ventes_items
-# plus tard: from .load_facts import load_fact_ventes_items
+from .extract_dw import (
+    read_d_category,
+    read_d_date,
+    read_d_product,
+    read_d_customer,
+    read_d_seller,
+    read_d_payment_type,
+    read_d_order_status,
+)
+from .transform_facts import build_fact_ventes_items
+from .load_facts import load_fact_ventes_items
 
 
 def run_etl_d_category():
@@ -112,6 +121,58 @@ def run_etl_d_order_status():
     print("LOAD: D_OrderStatus chargée dans Olist_DW.")
 
 
+def run_etl_fact_ventes_items():
+    print("ETL F_Ventes_Items - démarrage...")
+
+    # 1. EXTRACT staging
+    orders = extract_orders()
+    print(f"EXTRACT: {len(orders)} lignes dans orders.")
+
+    order_items = extract_order_items()
+    print(f"EXTRACT: {len(order_items)} lignes dans order_items.")
+
+    order_payments = extract_order_payments()
+    print(f"EXTRACT: {len(order_payments)} lignes dans order_payments.")
+
+    products = extract_products()
+    print(f"EXTRACT: {len(products)} lignes dans products.")
+
+    customers = extract_customers()
+    print(f"EXTRACT: {len(customers)} lignes dans customers.")
+
+    sellers = extract_sellers()
+    print(f"EXTRACT: {len(sellers)} lignes dans sellers.")
+
+    # 2. EXTRACT dimensions DW
+    d_date = read_d_date()
+    d_product = read_d_product()
+    d_customer = read_d_customer()
+    d_seller = read_d_seller()
+    d_payment_type = read_d_payment_type()
+    d_order_status = read_d_order_status()
+
+    # 3. TRANSFORM
+    fact_df = build_fact_ventes_items(
+        orders,
+        order_items,
+        order_payments,
+        products,
+        customers,
+        sellers,
+        d_date,
+        d_product,
+        d_customer,
+        d_seller,
+        d_payment_type,
+        d_order_status,
+    )
+    print(f"TRANSFORM: {len(fact_df)} lignes de faits construites.")
+
+    # 4. LOAD
+    load_fact_ventes_items(fact_df, truncate=True)
+    print("LOAD: F_Ventes_Items chargée dans Olist_DW.")
+
+
 def run_etl_dimensions_only():
     """
     Pipeline ETL pour les dimensions uniquement (première étape).
@@ -139,3 +200,4 @@ if __name__ == "__main__":
     #run_etl_d_payment_type()
     #run_etl_d_order_status()
     run_etl_dimensions_only()
+    run_etl_fact_ventes_items()

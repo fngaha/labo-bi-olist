@@ -192,6 +192,96 @@ Mettre en place un premier flux ETL 100 % Python (SQLAlchemy + pandas) entre le 
 
 ---
 
+## Séance 3 – [2025-11-29]
+
+### Objectif principal
+Créer la table de faits `F_Ventes_Items` dans le datawarehouse `Olist_DW` et implémenter l’ETL Python complet permettant de charger les ventes au niveau du détail des lignes de commande (grain : 1 ligne par item de commande).
+
+---
+
+### Tâches réalisées
+
+- Création de la table de faits dans `Olist_DW` :
+  - Script SQL `Create_F_Ventes_Items.sql` avec :
+    - Clé technique `Fact_SK` (IDENTITY)
+    - Clés étrangères vers :
+      - `D_Date` (`Date_SK`)
+      - `D_Product` (`Product_SK`)
+      - `D_Customer` (`Customer_SK`)
+      - `D_Seller` (`Seller_SK`)
+      - `D_PaymentType` (`PaymentType_SK`)
+      - `D_OrderStatus` (`OrderStatus_SK`)
+    - Identifiants opérationnels :
+      - `order_id`, `order_item_id`
+    - Mesures :
+      - `price`, `freight_value`, `quantity`
+      - colonne calculée `total_item_value = price * quantity`
+      - `total_weight_g`
+    - Timestamps :
+      - `order_purchase_timestamp`
+      - `order_delivered_customer_date`
+
+- Mise en place de l’ETL Python pour la table de faits dans `03_etl/etl/` :
+  - `extract_staging.py` :
+    - ajout de `extract_order_items()` pour lire `order_items`
+  - `extract_dw.py` :
+    - ajout de fonctions de lecture des dimensions avec leurs SK :
+      - `read_d_date()`
+      - `read_d_product()`
+      - `read_d_customer()`
+      - `read_d_seller()`
+      - `read_d_payment_type()`
+      - `read_d_order_status()`
+  - `transform_facts.py` :
+    - fonction `build_fact_ventes_items(...)` qui :
+      - joint `order_items` et `orders` (client, statut, timestamps)
+      - enrichit avec `customers` (customer_unique_id), `products` (poids), `sellers`
+      - identifie le paiement principal via `order_payments` (`payment_sequential = 1`)
+      - dérive la date d’achat (`order_purchase_date`) et fait le lookup vers `D_Date` (via `Date_Actual`)
+      - fait les lookups SK vers :
+        - `D_Product` (via `product_id`)
+        - `D_Customer` (via `customer_unique_id`)
+        - `D_Seller` (via `seller_id`)
+        - `D_PaymentType` (via `payment_type`)
+        - `D_OrderStatus` (via `order_status`)
+      - calcule les mesures :
+        - `quantity` (1 par ligne de `order_items`)
+        - `total_weight_g = product_weight_g * quantity`
+  - `load_facts.py` :
+    - fonction `load_fact_ventes_items(...)` avec :
+      - `TRUNCATE TABLE dbo.F_Ventes_Items`
+      - insertion via `to_sql` dans `Olist_DW.dbo.F_Ventes_Items`
+  - `main.py` :
+    - ajout de la fonction `run_etl_fact_ventes_items()` orchestrant :
+      - EXTRACT des tables de staging nécessaires
+      - EXTRACT des dimensions DW
+      - TRANSFORM via `build_fact_ventes_items(...)`
+      - LOAD via `load_fact_ventes_items(...)`
+
+- Exécution et validation de l’ETL de la table de faits :
+  - Lancement de `run_etl_fact_ventes_items()` dans la VM.
+  - Vérification dans SQL Server :
+    - `SELECT TOP 10 * FROM Olist_DW.dbo.F_Ventes_Items;`
+    - `SELECT COUNT(*) FROM Olist_DW.dbo.F_Ventes_Items;`
+  - Constat : la table de faits est correctement alimentée avec toutes les SK et les mesures.
+
+---
+
+### Points techniques importants
+
+- L’ETL de la table de faits repose sur les dimensions déjà chargées au préalable.
+- La table de faits utilise `order_purchase_timestamp` comme base pour le lien vers `D_Date`.
+- Le type de paiement utilisé est le paiement principal (`payment_sequential = 1`) pour affecter `PaymentType_SK`.
+- Le grain de la fact est bien : **1 ligne par combinaison (`order_id`, `order_item_id`)**.
+
+---
+
+### Prochaines étapes
+
+- Connecter `Olist_DW` à Power BI pour construire les premiers rapports (ventes par produit, par vendeur, par client, par type de paiement, par statut, par période…).
+
+---
+
 ## Bilan final
 
 **Résumé global :**
