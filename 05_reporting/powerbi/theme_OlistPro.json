@@ -1,0 +1,52 @@
+{
+  "name": "OlistPro – Clean & Modern",
+  "dataColors": [
+    "#005B82",
+    "#00A6A6",
+    "#FFC857",
+    "#E9724C",
+    "#FF6F59",
+    "#2A9D8F",
+    "#457B9D",
+    "#A8DADC"
+  ],
+  "background": "#FAFAFA",
+  "foreground": "#333333",
+  "tableAccent": "#005B82",
+  "visualStyles": {
+    "*": {
+      "*": {
+        "title": [
+          {
+            "color": { "solid": { "color": "#333333" } }
+          }
+        ],
+        "background": [
+          {
+            "color": { "solid": { "color": "#FAFAFA" } }
+          }
+        ],
+        "labels": [
+          {
+            "color": { "solid": { "color": "#333333" } }
+          }
+        ],
+        "color": [
+          {
+            "solid": { "color": "#333333" }
+          }
+        ]
+      }
+    }
+  },
+  "textClasses": {
+    "callout": {
+      "fontSize": 22,
+      "color": "#005B82"
+    },
+    "title": {
+      "fontSize": 16,
+      "color": "#333333"
+    }
+  }
+}

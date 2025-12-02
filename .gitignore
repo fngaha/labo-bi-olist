@@ -12,7 +12,7 @@ bin/
 obj/
 
 # Power BI fichiers lourds (optionnel)
-# *.pbix
+*.pbix
 # *.pbit
 
 # Fichiers logs
