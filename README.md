@@ -1,3 +1,6 @@
+# Portfolio – Franck Ngaha (alias fngaha)
+Bienvenue dans mon espace GitHub où je publie mes projets Python, IA et data.
+
 # Labo BI – Olist (Marketplace brésilien)
 
 Ce projet est réalisé dans le cadre du module **"Labo modélisation de données"** de la formation *Développeur orienté IA*.  

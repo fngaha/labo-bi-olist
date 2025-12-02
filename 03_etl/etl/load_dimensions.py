@@ -20,7 +20,8 @@ def load_d_category(dim_category: pd.DataFrame, truncate: bool = False) -> None:
 
     with engine.begin() as conn:
         if truncate:
-            conn.execute(text("TRUNCATE TABLE dbo.D_Category;"))
+            conn.execute(text("ALTER TABLE dbo.D_Product NOCHECK CONSTRAINT ALL;"))
+            conn.execute(text("DELETE FROM dbo.D_Category;"))
 
         # On insère uniquement les colonnes non-SK
         dim_category.to_sql(
@@ -44,7 +45,8 @@ def load_d_product(dim_product: pd.DataFrame, truncate: bool = True) -> None:
 
     with engine.begin() as conn:
         if truncate:
-            conn.execute(text("TRUNCATE TABLE dbo.D_Product;"))
+            conn.execute(text("ALTER TABLE dbo.F_Ventes_Items NOCHECK CONSTRAINT ALL;"))
+            conn.execute(text("DELETE FROM dbo.D_Product;"))
 
         dim_product.to_sql(
             "D_Product",
@@ -67,7 +69,7 @@ def load_d_customer(dim_customer: pd.DataFrame, truncate: bool = True) -> None:
 
     with engine.begin() as conn:
         if truncate:
-            conn.execute(text("TRUNCATE TABLE dbo.D_Customer;"))
+            conn.execute(text("DELETE FROM dbo.D_Customer;"))
 
         dim_customer.to_sql(
             "D_Customer",
@@ -90,7 +92,7 @@ def load_d_seller(dim_seller: pd.DataFrame, truncate: bool = True) -> None:
 
     with engine.begin() as conn:
         if truncate:
-            conn.execute(text("TRUNCATE TABLE dbo.D_Seller;"))
+            conn.execute(text("DELETE FROM dbo.D_Seller;"))
 
         dim_seller.to_sql(
             "D_Seller",
@@ -109,7 +111,7 @@ def load_d_payment_type(dim_payment_type: pd.DataFrame, truncate: bool = True) -
 
     with engine.begin() as conn:
         if truncate:
-            conn.execute(text("TRUNCATE TABLE dbo.D_PaymentType;"))
+            conn.execute(text("DELETE FROM dbo.D_PaymentType;"))
 
         dim_payment_type.to_sql(
             "D_PaymentType",
@@ -128,7 +130,7 @@ def load_d_order_status(dim_order_status: pd.DataFrame, truncate: bool = True) -
 
     with engine.begin() as conn:
         if truncate:
-            conn.execute(text("TRUNCATE TABLE dbo.D_OrderStatus;"))
+            conn.execute(text("DELETE FROM dbo.D_OrderStatus;"))
 
         dim_order_status.to_sql(
             "D_OrderStatus",

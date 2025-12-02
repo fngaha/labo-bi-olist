@@ -8,7 +8,7 @@ from .db_connection import get_engine
 
 def extract_categories() -> pd.DataFrame:
     engine = get_engine("database_staging")
-    query = "SELECT * FROM dbo.product_category_name_translation;"
+    query = "SELECT * FROM dbo.category_name_translation;"
     df = pd.read_sql(query, engine)
     return df
 

@@ -1,3 +1,20 @@
+import argparse
+import logging
+from pathlib import Path
+from .db_connection import get_engine
+from sqlalchemy import text
+
+LOG_PATH = Path(__file__).resolve().parent.parent / "etl_olist.log"
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
+    filename=str(LOG_PATH),
+    filemode="a",
+)
+
+logger = logging.getLogger("etl_olist")
+
 from .extract_staging import (
     extract_categories,
     extract_products,
@@ -37,113 +54,110 @@ from .load_facts import load_fact_ventes_items
 
 
 def run_etl_d_category():
-    print("ETL D_Category - démarrage...")
+    logger.info("ETL D_Category - démarrage...")
 
     categories = extract_categories()
-    print(f"EXTRACT: {len(categories)} lignes lues depuis product_category_name_translation.")
+    logger.info(f"EXTRACT: {len(categories)} lignes lues depuis product_category_name_translation.")
 
     dim_category = build_d_category(categories)
-    print(f"TRANSFORM: {len(dim_category)} catégories distinctes construites.")
+    logger.info(f"TRANSFORM: {len(dim_category)} catégories distinctes construites.")
 
     load_d_category(dim_category, truncate=True)
-    print("LOAD: D_Category chargée dans Olist_DW.")
+    logger.info("LOAD: D_Category chargée dans Olist_DW.")
 
 
 def run_etl_d_product():
-    print("ETL D_Product - démarrage...")
+    logger.info("ETL D_Product - démarrage...")
 
     # 1. EXTRACT
     products = extract_products()
-    print(f"EXTRACT: {len(products)} produits lus depuis products (staging).")
+    logger.info(f"EXTRACT: {len(products)} produits lus depuis products (staging).")
 
     dim_category_dw = read_d_category()
-    print(f"EXTRACT: {len(dim_category_dw)} lignes lues depuis D_Category (DW).")
+    logger.info(f"EXTRACT: {len(dim_category_dw)} lignes lues depuis D_Category (DW).")
 
     # 2. TRANSFORM
     dim_product = build_d_product(products, dim_category_dw)
-    print(f"TRANSFORM: {len(dim_product)} produits dimensionnels construits.")
+    logger.info(f"TRANSFORM: {len(dim_product)} produits dimensionnels construits.")
 
     # 3. LOAD
     load_d_product(dim_product, truncate=True)
-    print("LOAD: D_Product chargée dans Olist_DW.")
+    logger.info("LOAD: D_Product chargée dans Olist_DW.")
 
 
 def run_etl_d_customer():
-    print("ETL D_Customer - démarrage...")
+    logger.info("ETL D_Customer - démarrage...")
 
     customers = extract_customers()
-    print(f"EXTRACT: {len(customers)} lignes lues depuis customers (staging).")
+    logger.info(f"EXTRACT: {len(customers)} lignes lues depuis customers (staging).")
 
     dim_customer = build_d_customer(customers)
-    print(f"TRANSFORM: {len(dim_customer)} clients dimensionnels construits "
+    logger.info(f"TRANSFORM: {len(dim_customer)} clients dimensionnels construits "
           f"(1 ligne par customer_unique_id).")
 
     load_d_customer(dim_customer, truncate=True)
-    print("LOAD: D_Customer chargée dans Olist_DW.")
+    logger.info("LOAD: D_Customer chargée dans Olist_DW.")
 
 
 def run_etl_d_seller():
-    print("ETL D_Seller - démarrage...")
+    logger.info("ETL D_Seller - démarrage...")
 
     sellers = extract_sellers()
-    print(f"EXTRACT: {len(sellers)} lignes lues depuis sellers (staging).")
+    logger.info(f"EXTRACT: {len(sellers)} lignes lues depuis sellers (staging).")
 
     dim_seller = build_d_seller(sellers)
-    print(f"TRANSFORM: {len(dim_seller)} vendeurs dimensionnels construits.")
+    logger.info(f"TRANSFORM: {len(dim_seller)} vendeurs dimensionnels construits.")
 
     load_d_seller(dim_seller, truncate=True)
-    print("LOAD: D_Seller chargée dans Olist_DW.")
+    logger.info("LOAD: D_Seller chargée dans Olist_DW.")
 
 
 def run_etl_d_payment_type():
-    print("ETL D_PaymentType - démarrage...")
+    logger.info("ETL D_PaymentType - démarrage...")
 
     order_payments = extract_order_payments()
-    print(f"EXTRACT: {len(order_payments)} lignes lues depuis order_payments (staging).")
+    logger.info(f"EXTRACT: {len(order_payments)} lignes lues depuis order_payments (staging).")
 
     dim_payment_type = build_d_payment_type(order_payments)
-    print(f"TRANSFORM: {len(dim_payment_type)} types de paiement distincts construits.")
+    logger.info(f"TRANSFORM: {len(dim_payment_type)} types de paiement distincts construits.")
 
     load_d_payment_type(dim_payment_type, truncate=True)
-    print("LOAD: D_PaymentType chargée dans Olist_DW.")
+    logger.info("LOAD: D_PaymentType chargée dans Olist_DW.")
 
 
 def run_etl_d_order_status():
-    print("ETL D_OrderStatus - démarrage...")
+    logger.info("ETL D_OrderStatus - démarrage...")
 
     orders = extract_orders()
-    print(f"EXTRACT: {len(orders)} lignes lues depuis orders (staging).")
+    logger.info(f"EXTRACT: {len(orders)} lignes lues depuis orders (staging).")
 
     dim_order_status = build_d_order_status(orders)
-    print(f"TRANSFORM: {len(dim_order_status)} statuts de commande distincts construits.")
+    logger.info(f"TRANSFORM: {len(dim_order_status)} statuts de commande distincts construits.")
 
     load_d_order_status(dim_order_status, truncate=True)
-    print("LOAD: D_OrderStatus chargée dans Olist_DW.")
+    logger.info("LOAD: D_OrderStatus chargée dans Olist_DW.")
+
+
+def run_etl_dimensions():
+    logger.info("=== ETL DIMENSIONS - DÉBUT ===")
+    run_etl_d_category()
+    run_etl_d_product()
+    run_etl_d_customer()
+    run_etl_d_seller()
+    run_etl_d_payment_type()
+    run_etl_d_order_status()
+    logger.info("=== ETL DIMENSIONS - FIN ===")
 
 
 def run_etl_fact_ventes_items():
-    print("ETL F_Ventes_Items - démarrage...")
-
-    # 1. EXTRACT staging
+    logger.info("ETL F_Ventes_Items - démarrage")
     orders = extract_orders()
-    print(f"EXTRACT: {len(orders)} lignes dans orders.")
-
     order_items = extract_order_items()
-    print(f"EXTRACT: {len(order_items)} lignes dans order_items.")
-
     order_payments = extract_order_payments()
-    print(f"EXTRACT: {len(order_payments)} lignes dans order_payments.")
-
     products = extract_products()
-    print(f"EXTRACT: {len(products)} lignes dans products.")
-
     customers = extract_customers()
-    print(f"EXTRACT: {len(customers)} lignes dans customers.")
-
     sellers = extract_sellers()
-    print(f"EXTRACT: {len(sellers)} lignes dans sellers.")
 
-    # 2. EXTRACT dimensions DW
     d_date = read_d_date()
     d_product = read_d_product()
     d_customer = read_d_customer()
@@ -151,7 +165,6 @@ def run_etl_fact_ventes_items():
     d_payment_type = read_d_payment_type()
     d_order_status = read_d_order_status()
 
-    # 3. TRANSFORM
     fact_df = build_fact_ventes_items(
         orders,
         order_items,
@@ -166,38 +179,87 @@ def run_etl_fact_ventes_items():
         d_payment_type,
         d_order_status,
     )
-    print(f"TRANSFORM: {len(fact_df)} lignes de faits construites.")
-
-    # 4. LOAD
     load_fact_ventes_items(fact_df, truncate=True)
-    print("LOAD: F_Ventes_Items chargée dans Olist_DW.")
+    logger.info("ETL F_Ventes_Items - terminé")
+
+    # Contrôles qualité rapides
+    engine = get_engine("database_dw")
+    with engine.connect() as conn:
+        # Nombre de lignes
+        res = conn.execute(text("SELECT COUNT(*) AS cnt FROM dbo.F_Ventes_Items;"))
+        cnt = res.fetchone().cnt
+        logger.info("QC: F_Ventes_Items contient %d lignes", cnt)
+
+        # Recherche de SK NULL
+        res_null = conn.execute(text("""
+            SELECT COUNT(*) AS cnt_null
+            FROM dbo.F_Ventes_Items
+            WHERE Date_SK IS NULL
+               OR Product_SK IS NULL
+               OR Customer_SK IS NULL
+               OR Seller_SK IS NULL
+               OR OrderStatus_SK IS NULL
+        """))
+        cnt_null = res_null.fetchone().cnt_null
+
+        if cnt_null > 0:
+            logger.warning(
+                "QC: %d lignes dans F_Ventes_Items ont au moins une SK NULL",
+                cnt_null
+            )
+        else:
+            logger.info("QC: aucune SK NULL détectée dans F_Ventes_Items.")
 
 
-def run_etl_dimensions_only():
-    """
-    Pipeline ETL pour les dimensions uniquement (première étape).
-    """
-    print("ETL - Démarrage (dimensions)...")
+def run_etl_all():
+    logger.info("=== ETL COMPLET OLIST - DÉBUT ===")
+    run_etl_dimensions()
+    run_etl_fact_ventes_items()
+    logger.info("=== ETL COMPLET OLIST - FIN ===")
 
-    # 1. EXTRACT
-    staging = extract_all_staging()
-    print("EXTRACT terminé.")
 
-    # 2. TRANSFORM
-    dims = build_all_dimensions(staging)
-    print("TRANSFORM des dimensions terminé.")
+def main():
+    parser = argparse.ArgumentParser(description="ETL Olist DW")
+    parser.add_argument(
+        "--job",
+        type=str,
+        default="all",
+        choices=[
+            "all",
+            "dimensions",
+            "fact",
+            "d_category",
+            "d_product",
+            "d_customer",
+            "d_seller",
+            "d_paymenttype",
+            "d_orderstatus",
+        ],
+        help="Job ETL à exécuter",
+    )
+    args = parser.parse_args()
 
-    # 3. LOAD
-    load_all_dimensions(dims)
-    print("LOAD des dimensions terminé.")
-
+    if args.job == "all":
+        run_etl_all()
+    elif args.job == "dimensions":
+        run_etl_dimensions()
+    elif args.job == "fact":
+        run_etl_fact_ventes_items()
+    elif args.job == "d_category":
+        run_etl_d_category()
+    elif args.job == "d_product":
+        run_etl_d_product()
+    elif args.job == "d_customer":
+        run_etl_d_customer()
+    elif args.job == "d_seller":
+        run_etl_d_seller()
+    elif args.job == "d_paymenttype":
+        run_etl_d_payment_type()
+    elif args.job == "d_orderstatus":
+        run_etl_d_order_status()
+    else:
+        raise ValueError(f"Job ETL invalide: {args.job}")
 
 if __name__ == "__main__":
-    # run_etl_d_category()
-    #run_etl_d_product()
-    #run_etl_d_customer()
-    #run_etl_d_seller()
-    #run_etl_d_payment_type()
-    #run_etl_d_order_status()
-    run_etl_dimensions_only()
-    run_etl_fact_ventes_items()
+    main()
+
