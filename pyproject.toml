@@ -1,0 +1,29 @@
+[tool.black]
+line-length = 88
+target-version = ["py39"]
+skip-string-normalization = false
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+# Dossiers à analyser
+src = ["03_etl"]
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+]
+
+# Ruff va aussi jouer le rôle de isort
+[tool.ruff.lint]
+select = [
+    "E", "F", "W",      # erreurs/avertissements de base (flake8)
+    "I",                # import sorting (isort-like)
+]
+ignore = [
+    # ajouter plus tard si checks ennuyent
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["etl"]
+combine-as-imports = true

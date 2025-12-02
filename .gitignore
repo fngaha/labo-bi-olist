@@ -21,3 +21,6 @@ obj/
 # Environnements virtuels Python
 venv/
 .env/
+
+__pycache__/
+*.pyc

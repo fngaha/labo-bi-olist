@@ -61,12 +61,8 @@ def build_fact_ventes_items(
     )
 
     # 5) Paiement principal : payment_sequential = 1
-    payments_sorted = order_payments.sort_values(
-        ["order_id", "payment_sequential"]
-    )
-    payments_main = payments_sorted.drop_duplicates(
-        subset=["order_id"], keep="first"
-    )
+    payments_sorted = order_payments.sort_values(["order_id", "payment_sequential"])
+    payments_main = payments_sorted.drop_duplicates(subset=["order_id"], keep="first")
     payments_main = payments_main[["order_id", "payment_type"]]
 
     base = base.merge(
@@ -76,9 +72,7 @@ def build_fact_ventes_items(
     )
 
     # 6) Cast des timestamps et dérivation de la date d'achat (pour D_Date)
-    base["order_purchase_timestamp"] = pd.to_datetime(
-        base["order_purchase_timestamp"]
-    )
+    base["order_purchase_timestamp"] = pd.to_datetime(base["order_purchase_timestamp"])
     base["order_delivered_customer_date"] = pd.to_datetime(
         base["order_delivered_customer_date"]
     )

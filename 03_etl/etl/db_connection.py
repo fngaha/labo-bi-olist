@@ -20,8 +20,8 @@ def build_connection_url(database_key: str) -> str:
     """
     cfg = load_config()["sqlserver"]
 
-    host = cfg["host"]                 # ex: GOS-VDI410\TFTIC
-    db = cfg[database_key]            # Olist_Staging ou Olist_DW
+    host = cfg["host"]  # ex: GOS-VDI410\TFTIC
+    db = cfg[database_key]  # Olist_Staging ou Olist_DW
     driver = urllib.parse.quote_plus(cfg["driver"])
 
     user = cfg.get("user") or ""

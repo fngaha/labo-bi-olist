@@ -1,8 +1,5 @@
 import pandas as pd
-from .db_connection import get_engine
 
-
-import pandas as pd
 from .db_connection import get_engine
 
 
@@ -52,6 +49,7 @@ def extract_sellers() -> pd.DataFrame:
     df = pd.read_sql(query, engine)
     return df
 
+
 def extract_order_payments() -> pd.DataFrame:
     """
     Lit la table order_payments dans le staging.
@@ -60,6 +58,7 @@ def extract_order_payments() -> pd.DataFrame:
     query = "SELECT * FROM dbo.order_payments;"
     df = pd.read_sql(query, engine)
     return df
+
 
 def extract_orders() -> pd.DataFrame:
     """

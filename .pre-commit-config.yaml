@@ -1,0 +1,14 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 24.10.0  # ou la dernière version stable
+    hooks:
+      - id: black
+        language_version: python3
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.3  # ou la dernière version stable
+    hooks:
+      - id: ruff
+        args: ["--fix", "--exit-non-zero-on-fix"]
+        # --fix = corrige automatiquement les erreurs simples (imports, etc.)
+        # --exit-non-zero-on-fix = le hook échoue si des corrections ont été faites

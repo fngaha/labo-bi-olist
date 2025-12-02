@@ -20,7 +20,9 @@ def build_d_category(categories: pd.DataFrame) -> pd.DataFrame:
     return dim
 
 
-def build_d_product(products: pd.DataFrame, dim_category_with_sk: pd.DataFrame) -> pd.DataFrame:
+def build_d_product(
+    products: pd.DataFrame, dim_category_with_sk: pd.DataFrame
+) -> pd.DataFrame:
     """
     Construit la dimension D_Product à partir de la table products
     et de D_Category (avec Category_SK).
@@ -33,7 +35,7 @@ def build_d_product(products: pd.DataFrame, dim_category_with_sk: pd.DataFrame) 
     dim = base.merge(
         dim_category_with_sk[["product_category_name", "Category_SK"]],
         how="left",
-        on="product_category_name"
+        on="product_category_name",
     )
 
     # 3. Sélection des colonnes dans l'ordre de la table SQL (sans Product_SK)
@@ -83,9 +85,7 @@ def build_d_customer(customers: pd.DataFrame) -> pd.DataFrame:
     Si plusieurs customer_id pour un même customer_unique_id, on garde la première occurrence.
     """
     # On trie pour rendre le choix déterministe (par exemple par customer_unique_id, puis customer_id)
-    df = customers.sort_values(
-        ["customer_unique_id", "customer_id"]
-    ).copy()
+    df = customers.sort_values(["customer_unique_id", "customer_id"]).copy()
 
     # On garde la première ligne par customer_unique_id
     df_unique = df.drop_duplicates(subset=["customer_unique_id"], keep="first")
@@ -122,6 +122,7 @@ def build_d_seller(sellers: pd.DataFrame) -> pd.DataFrame:
 
     return dim
 
+
 def build_d_payment_type(order_payments: pd.DataFrame) -> pd.DataFrame:
     """
     Construit la dimension D_PaymentType à partir de order_payments.
@@ -135,6 +136,7 @@ def build_d_payment_type(order_payments: pd.DataFrame) -> pd.DataFrame:
         .reset_index(drop=True)
     )
     return dim
+
 
 def build_d_order_status(orders: pd.DataFrame) -> pd.DataFrame:
     """

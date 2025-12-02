@@ -57,7 +57,9 @@ def run_etl_d_category():
     logger.info("ETL D_Category - démarrage...")
 
     categories = extract_categories()
-    logger.info(f"EXTRACT: {len(categories)} lignes lues depuis product_category_name_translation.")
+    logger.info(
+        f"EXTRACT: {len(categories)} lignes lues depuis product_category_name_translation."
+    )
 
     dim_category = build_d_category(categories)
     logger.info(f"TRANSFORM: {len(dim_category)} catégories distinctes construites.")
@@ -92,8 +94,10 @@ def run_etl_d_customer():
     logger.info(f"EXTRACT: {len(customers)} lignes lues depuis customers (staging).")
 
     dim_customer = build_d_customer(customers)
-    logger.info(f"TRANSFORM: {len(dim_customer)} clients dimensionnels construits "
-          f"(1 ligne par customer_unique_id).")
+    logger.info(
+        f"TRANSFORM: {len(dim_customer)} clients dimensionnels construits "
+        f"(1 ligne par customer_unique_id)."
+    )
 
     load_d_customer(dim_customer, truncate=True)
     logger.info("LOAD: D_Customer chargée dans Olist_DW.")
@@ -116,10 +120,14 @@ def run_etl_d_payment_type():
     logger.info("ETL D_PaymentType - démarrage...")
 
     order_payments = extract_order_payments()
-    logger.info(f"EXTRACT: {len(order_payments)} lignes lues depuis order_payments (staging).")
+    logger.info(
+        f"EXTRACT: {len(order_payments)} lignes lues depuis order_payments (staging)."
+    )
 
     dim_payment_type = build_d_payment_type(order_payments)
-    logger.info(f"TRANSFORM: {len(dim_payment_type)} types de paiement distincts construits.")
+    logger.info(
+        f"TRANSFORM: {len(dim_payment_type)} types de paiement distincts construits."
+    )
 
     load_d_payment_type(dim_payment_type, truncate=True)
     logger.info("LOAD: D_PaymentType chargée dans Olist_DW.")
@@ -132,7 +140,9 @@ def run_etl_d_order_status():
     logger.info(f"EXTRACT: {len(orders)} lignes lues depuis orders (staging).")
 
     dim_order_status = build_d_order_status(orders)
-    logger.info(f"TRANSFORM: {len(dim_order_status)} statuts de commande distincts construits.")
+    logger.info(
+        f"TRANSFORM: {len(dim_order_status)} statuts de commande distincts construits."
+    )
 
     load_d_order_status(dim_order_status, truncate=True)
     logger.info("LOAD: D_OrderStatus chargée dans Olist_DW.")
@@ -191,7 +201,9 @@ def run_etl_fact_ventes_items():
         logger.info("QC: F_Ventes_Items contient %d lignes", cnt)
 
         # Recherche de SK NULL
-        res_null = conn.execute(text("""
+        res_null = conn.execute(
+            text(
+                """
             SELECT COUNT(*) AS cnt_null
             FROM dbo.F_Ventes_Items
             WHERE Date_SK IS NULL
@@ -199,13 +211,14 @@ def run_etl_fact_ventes_items():
                OR Customer_SK IS NULL
                OR Seller_SK IS NULL
                OR OrderStatus_SK IS NULL
-        """))
+        """
+            )
+        )
         cnt_null = res_null.fetchone().cnt_null
 
         if cnt_null > 0:
             logger.warning(
-                "QC: %d lignes dans F_Ventes_Items ont au moins une SK NULL",
-                cnt_null
+                "QC: %d lignes dans F_Ventes_Items ont au moins une SK NULL", cnt_null
             )
         else:
             logger.info("QC: aucune SK NULL détectée dans F_Ventes_Items.")
@@ -260,6 +273,6 @@ def main():
     else:
         raise ValueError(f"Job ETL invalide: {args.job}")
 
+
 if __name__ == "__main__":
     main()
-
