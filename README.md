@@ -1,208 +1,350 @@
-# Portfolio – Franck Ngaha (alias fngaha)
-Bienvenue dans mon espace GitHub où je publie mes projets Python, IA et data.
+# 🇫🇷 Labo BI Olist — Datawarehouse, ETL Python & Dashboard Power BI
 
-# Labo BI – Olist (Marketplace brésilien)
+Ce projet a été réalisé dans le cadre du module **"Labo modélisation de données"** de la formation **Développeur orienté IA** (Technofutur TIC).
+Il constitue un pipeline BI complet, similaire à ce qui est fait dans une vraie équipe Data Engineering.
 
-Ce projet est réalisé dans le cadre du module **"Labo modélisation de données"** de la formation *Développeur orienté IA*.  
-Il met en place un **datawarehouse Olist** complet sur SQL Server, un **ETL Python** (pandas + SQLAlchemy) et un **modèle Power BI** pour l’analyse des ventes e-commerce.
-
-Les données Olist proviennent du dataset public :
-- Kaggle – *Brazilian E-Commerce Public Dataset by Olist*.
-
----
-
-## Objectifs du projet
-
-- Comprendre et implémenter un **modèle en étoile** (star schema) à partir des données Olist.
-- Mettre en place un **staging** puis un **datawarehouse** dans SQL Server.
-- Développer un **ETL 100 % Python** :
-  - EXTRACT depuis le staging SQL Server
-  - TRANSFORM vers des dimensions et une table de faits
-  - LOAD dans le datawarehouse
-- Construire un **dashboard Power BI** connecté au DW.
+- Modèle dimensionnel (schéma en étoile)
+- ETL Python structuré (extract / transform / load)
+- Datawarehouse SQL Server
+- Dashboard Power BI professionnel (multi-pages)
+- Qualité de code : Black, Ruff, pre-commit
+- Architecture prête pour Airflow/Pipelines
 
 ---
 
-## Architecture du projet
+## 1. Objectifs du projet
+
+- Analyser le dataset Olist (e-commerce brésilien).
+
+- Concevoir un schéma en étoile autour des ventes.
+
+- Construire un staging et un datawarehouse sur SQL Server.
+
+- Développer un ETL Python structuré en extract / transform / load.
+
+- Créer un dashboard Power BI interactif basé sur le DW.
+
+- Appliquer les bonnes pratiques professionnelles de data engineering.
+
+---
+
+## 2. Architecture du projet
 
 ```text
 labo-bi-olist/
-│
-├── 01_comprehension_donnees/             # Notes et analyse des datasets Olist
-├── 02_modele_dimensionnel/               # Schéma en étoile, description des dimensions/faits
-├── 03_etl/
-│   ├── etl/
-│   │   ├── config.yaml                   # Paramètres de connexion SQL Server (staging + DW)
-│   │   ├── db_connection.py              # Connexion SQLAlchemy + pyodbc
-│   │   ├── extract_staging.py            # Extraction des tables de staging
-│   │   ├── extract_dw.py                 # Lecture des dimensions dans le DW
-│   │   ├── transform_dimensions.py       # Construction des dimensions
-│   │   ├── transform_facts.py            # Construction de la table de faits F_Ventes_Items
-│   │   ├── load_dimensions.py            # Chargement des dimensions dans le DW
-│   │   ├── load_facts.py                 # Chargement de la table de faits
-│   │   └── main.py                       # Orchestration de l’ETL (fonctions run_etl_*)
-│   ├── mapping_sources_cibles.md         # Mapping source → cible (staging → dimensions/faits)
-│   ├── test_connexion.py                 # Script de test rapide de la connexion SQL
-│   └── notes_etl.md
-│
-├── 04_datawarehouse/
-│   ├── Create_Olist_DW.sql               # Création de la base DW
-│   ├── Create_D_Date.sql                 # Création + peuplement de D_Date
-│   ├── Create_D_Category.sql
-│   ├── Create_D_Product.sql
-│   ├── Create_D_Customer.sql
-│   ├── Create_D_Seller.sql
-│   ├── Create_D_PaymentType.sql
-│   ├── Create_D_OrderStatus.sql
-│   ├── Create_F_Ventes_Items.sql         # Table de faits des ventes
-│   └── diagramme_modele_final.png
-│
-├── 05_reporting/
-│   ├── powerbi/
-│   └── └── Olist_DW_Report.pbix          # Rapport Power BI connecté au DW (non versionné si lourd)
-│
-├── journal_de_bord.md                    # Journal de bord de la progression
-│
-└── README.md                             # Ce fichier
+  01_comprehension_donnees/     # Analyse des datasets Olist
+  02_modele_dimensionnel/       # Star schema, dimensions et fact
+  03_etl/
+    etl/
+      db_connection.py          # Connexion SQLAlchemy/pyodbc
+      extract_staging.py        # Extract : staging SQL Server
+      extract_dw.py             # Extract : lookup dimensions DW
+      transform_dimensions.py   # Transform : dimensions
+      transform_facts.py        # Transform : F_Ventes_Items
+      load_dimensions.py        # Load : tables dimensionnelles
+      load_facts.py             # Load : fact table
+      main.py                   # Orchestration ETL (run_etl_all)
+    test_connexion.py
+  04_datawarehouse/
+    Create_D_*.sql              # Scripts SQL des dimensions
+    Create_F_Ventes_Items.sql   # Script SQL table de faits
+  05_powerbi/
+    Olist_DW_Model.pbit         # Template Power BI
+    theme_OlistPro.json         # Thème pro personnalisé
+    dashboard_*png|pdf          # Captures du dashboard
+    README_powerbi.md           # Documentation du modèle Power BI
+  journal_de_bord.md            # Notes du labo
+  README.md                     # Ce fichier
+
 ```
 
 ---
 
-## Modèle dimensionnel
-
-Le datawarehouse est un **schéma en étoile** centré sur les ventes :
-
-### Table de faits :
-
-- `F_Ventes_Items` – grain : 1 ligne par `(order_id, order_item_id)`
+## 3. Modèle dimensionnel (Star Schema)
 
 ### Dimensions :
 
-- `D_Date` – calendrier (Date_SK, Date_Actual, Year, Month, …)
+- D_Date : calendrier complet (Date_SK, année, mois, etc.)
 
-- `D_Product` – produits (Product_SK, product_id, catégorie, caractéristiques)
+- D_Product : produits et catégories
 
-- `D_Category` – catégories produit
+- D_Category : catégories produit
 
-- `D_Customer` – clients (Customer_SK, customer_unique_id, localisation)
+- D_Customer : clients
 
-- `D_Seller` – vendeurs (Seller_SK, localisation)
+- D_Seller : vendeurs
 
-- `D_PaymentType` – type de paiement
+- D_PaymentType : types de paiements
 
-- `D_OrderStatus` – statut des commandes
+- D_OrderStatus : statuts commandes
 
-![texte alternatif](04_datawarehouse/diagramme_modele_final.png)
 
----
+## Table de faits :
 
-## ETL Python
+- F_Ventes_Items
+  - Grain : 1 ligne = (order_id, order_item_id)
+  - Mesures : price, freight_value, quantity, total_item_value, total_weight_g
+  - Liens SK → toutes les dimensions
 
-L’ETL est écrit en Python avec :
-
-- pandas pour les transformations
-
-- SQLAlchemy + pyodbc pour la connexion à SQL Server
-
-- YAML pour la configuration (config.yaml)
-
-### Flux général
-
-1. EXTRACT (staging SQL Server) :
-
-  - orders, order_items, order_payments, products, customers, sellers, etc.
-
-2. TRANSFORM :
-
-  - Construction des dimensions :
-
-    - D_Category, D_Product, D_Customer, D_Seller, D_PaymentType, D_OrderStatus
-
-  - Construction de la table de faits F_Ventes_Items :
-
-    - jointure entre order_items, orders, customers, products, sellers, order_payments
-
-    - lookup des SK depuis les dimensions
-
-  - calcul des mesures (total_item_value, total_weight_g, etc.)
-
-3. LOAD (DW Olist_DW) :
-
-  - TRUNCATE + chargement des dimensions
-
-  - TRUNCATE + chargement de la fact
+  Les relations ont été automatiquement détectées dans Power BI car les FK SQL étaient correctement définies dans le DW.
 
 ---
 
-## Modèle Power BI
+## 4. ETL Python — Pattern Extract / Transform / Load
 
-Power BI Desktop se connecte directement à la base Olist_DW (Import) et charge :
+Le projet suit une architecture claire :
 
-- Dimensions : `D_Date`, `D_Product`, `D_Customer`, `D_Seller`, `D_PaymentType`, `D_OrderStatus`
+### Extractors
 
-- Fact : `F_Ventes_Items`
+Lire les données depuis :
 
-Les relations sont basées sur les clés substituts (*_SK), ce qui donne un schéma en étoile propre.
+- le staging SQL Server
 
-Plusieurs mesures DAX sont définies :
+- les dimensions du DW pour les SK lookups
 
-- Total Ventes
+Code : `extract_staging.py` & `extract_dw.py`
 
-- Total Quantité
+### Transformers
 
-- Total Delivery
+Logique métier :
 
-Poids Total (g)
+- jointures orders + order_items + customers
 
-Nb Commandes
+- enrichissement produits & vendeurs
 
-Nb Produits
+- dérivation de la date
 
-- Nb Clients
+- assignation des SK
 
-etc.
+- calcul des mesures
 
-Des pages de rapport typiques :
+Code : `transform_dimensions.py` & `transform_facts.py`
 
-Vue d’ensemble : KPIs, ventes par année, ventes par statut
+### Loaders
 
-Produits & catégories : top catégories, top produits
+Chargement propre dans SQL Server :
 
-Clients & géographie : ventes par état, ville, type de paiement
+- DELETE + INSERT
 
----
+- respect des FK
 
-## Améliorations possibles
+- qualité des types SQL
 
-- Ajout de logs et de tests automatiques sur l’ETL Python.
+Code : `load_dimensions.py` & `load_facts.py`
 
-- Ajout d’un orchestrateur (fonction run_etl_all, scheduler).
+### Orchestration
 
-- Enrichissement du modèle Power BI :
+`main.py` fournit :
 
-  - temps de livraison moyen
+````
+run_etl_dimensions()
+run_etl_fact_ventes_items()
+run_etl_all()  # pipeline complet
+````
 
-  - analyse des annulations
+L’ETL utilise maintenant :
 
-  - segmentation clients.
+- logging professionnel
 
-- Déploiement du rapport Power BI sur le service Power BI (si licence disponible).
+- contrôles qualité automatiques (SK NULL, nombre de lignes…)
 
----
-
-## Statut du projet
-
-- [x] Compréhension des données terminée
-- [x] Modèle dimensionnel validé
-- [x] ETL implémenté
-- [x] Datawarehouse alimenté
-- [x] Rapports BI créés
-- [ ] Documentation finalisée
+- structure prête pour Airflow
 
 ---
 
-## Author
+## 5. Dashboard Power BI
+
+Le dashboard inclus :
+
+### 1. Page Vue d’ensemble
+
+- Total Ventes, Nb Commandes, Nb Clients, Nb Produits
+
+- Ventes par année
+
+- Ventes par statut
+
+### 2. Page Produits & Catégories
+
+- Top catégories
+
+- Top produits
+
+- Slicer catégorie
+
+### 3. Page Clients & Géographie
+
+- Ventes par état
+
+- Top villes
+
+- Slicers : année, type de paiement
+
+### Thème personnalisé (OlistPro)
+
+Disponible dans :
+
+```
+05_powerbi/theme_OlistPro.json
+```
+
+### Captures d’écran
+
+(disponibles dans `05_powerbi/*.png|pdf`)
+
+---
+
+## 6. Qualité du code (Black, Ruff, pre-commit)
+
+Le projet utilise :
+
+- Black : formatage automatique
+
+- Ruff : lint + tri des imports (isort-like)
+
+- pre-commit : exécution automatique avant chaque commit
+
+Configuration dans :
+
+- `pyproject.toml`
+
+- `.pre-commit-config.yaml`
+
+---
+
+## 7. Comment exécuter l’ETL
+
+1. Installer les dépendances
+
+```
+pip install -r requirements.txt
+```
+
+2. Vérifier la connexion SQL Server
+
+```python
+python etl/test_connexion.py
+```
+
+3. Lancer l’ETL complet
+
+```python
+python -m 03_etl.etl.main --job all
+```
+
+ou :
+
+```python
+python -m 03_etl.etl.main
+```
+
+---
+
+## 6. Améliorations possibles
+
+- ajout de tests unitaires (pytest)
+
+- migration Airflow (DAG Python)
+
+- ajout d'un Data Lake (bronze → silver → gold)
+
+- enrichissement du modèle BI
+
+- automatisation des contrôles qualité avancés
+
+## 👤 Auteur
+Franck Ngaha  
+Développeur orienté IA – Data Engineering & BI  
+🎓 Formation Technofutur TIC  
+🌐 LinkedIn : https://www.linkedin.com/in/franck-ngaha
+
+---
+
+# 🇬🇧 Olist BI Lab — Data Warehouse, Python ETL & Power BI Dashboard
+
+This project was developed for the Data Modelling Lab within the AI-Oriented Developer training.
+It implements a fully functional enterprise-grade BI pipeline.
+
+- SQL Server Data Warehouse (star schema)
+- Python ETL pipeline (structured ETL pattern)
+- Professional Power BI Dashboard
+- Black + Ruff + pre-commit code quality
+- Architecture ready for Airflow DAGs
+
+## 1. Project Objectives
+
+- Analyze the Brazilian Olist e-commerce dataset
+
+- Design a star schema (dimensions + fact table)
+
+- Build a staging and a data warehouse in SQL Server
+
+- Develop a fully modular Python ETL pipeline
+
+- Create a multi-page Power BI report
+
+- Follow modern data engineering best practices
+
+## 2. Project Architecture
+
+(identical to the FR version — folder tree)
+
+## 3. Star Schema
+
+Dimensions: Date, Product, Category, Customer, Seller, PaymentType, OrderStatus
+
+Fact table: F_Ventes_Items (grain = order_id, order_item_id)
+
+The Power BI model automatically detected relationships thanks to SQL FK constraints.
+
+## 4. ETL Architecture (Extractor / Transformer / Loader)
+
+- Extract from SQL staging
+
+- Transform business logic (joins, SK mapping, measures)
+
+- Load into SQL DW with referential integrity
+
+The ETL is fully orchestrated via main.py and ready to be converted into an Airflow DAG.
+
+## 5. Power BI Dashboard
+
+Three pages:
+
+1. Overview
+
+2. Products & Categories
+
+3. Customers & Geography
+
+Includes a custom theme **(theme_OlistPro.json)** and reusable template **(.pbit)**.
+
+## 6. Code Quality
+
+- Black: auto-format
+
+- Ruff: lint + import sorting
+
+- pre-commit hooks
+
+## 7. Running the ETL
+
+```python
+python -m 03_etl.etl.main --job all
+```
+
+## 8. Future Enhancements
+
+- Airflow orchestration
+
+- Advanced data quality checks
+
+- Incremental loads
+
+- Lakehouse architecture
+
+## 👤 Author
 **Franck Ngaha**  
-Developer • Data Science & AI Enthusiast  
-[franck.o.ngaha@gmail.com](mailto:franck.o.ngaha@gmail.com)  
-[GitHub Profile](https://github.com/fngaha)
+AI-Oriented Developer – Data Engineering & Business Intelligence  
+🎓 Technofutur TIC Training Program  
+🌐 LinkedIn: https://www.linkedin.com/in/franck-ngaha
